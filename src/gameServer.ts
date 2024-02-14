@@ -6,12 +6,52 @@ export const gameServer = (): void => {
     
   })
 
+  let userIdx = 0;
+
   wss.on('connection', (ws) => {
     console.log('new connection');
   
     ws.on('message', (message) => {
       const { type, data } = JSON.parse(message.toString());
       console.log(type, data);
+      if (type === 'reg') {
+        userIdx++;
+        const { name, password } = JSON.parse(data);
+        const userData = JSON.stringify({
+          name, 
+          index: userIdx,
+          error: false,
+          errorText: ''
+        });
+
+        const regJson: string = JSON.stringify({
+          type: 'reg',
+          id: 0,
+          data: userData,
+        })
+
+        const winners = [
+          JSON.stringify({ name, wins: 0})
+        ]
+
+        const updateWinners: string = JSON.stringify({
+          type: 'update_winners',
+          id: 0,
+          data: winners,
+        })
+
+        console.log(password);
+        console.log(regJson, updateWinners);
+        
+        
+        ws.send(regJson, (err) => {
+          console.log(err);          
+        } );
+
+        ws.send(updateWinners, (err) => {
+          console.log(err);          
+        } );
+      }
     });
   });
 } ;
