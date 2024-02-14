@@ -6,7 +6,6 @@
     "scripts": {
         "start": "node ./index.ts",
         "start:dev": "nodemon ./index.ts",
-        "start:game": "nodemon ./src/gameServer.ts",
         "format": "prettier --write \"src/**/*.ts\"",
         "lint:fix": "eslint \"src/**/*.ts\" --fix",
         "test": "echo \"Error: no test specified\" && exit 1"
@@ -16,6 +15,7 @@
     "license": "ISC",
     "devDependencies": {
         "@types/node": "^20.11.17",
+        "@types/ws": "^8.5.10",
         "@typescript-eslint/eslint-plugin": "^7.0.1",
         "@typescript-eslint/parser": "^7.0.1",
         "eslint": "^8.56.0",
