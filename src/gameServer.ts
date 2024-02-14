@@ -30,14 +30,12 @@ export const gameServer = (): void => {
           data: userData,
         })
 
-        const winners = [
-          JSON.stringify({ name, wins: 0})
-        ]
+        const winners = [{ name, wins: 1}, { name: 'Eugene', wins: 2 }]; //[]
 
         const updateWinners: string = JSON.stringify({
           type: 'update_winners',
           id: 0,
-          data: winners,
+          data: JSON.stringify(winners),
         })
 
         console.log(password);
