@@ -23,23 +23,28 @@ export const gameServer = (): void => {
 
       switch (type) {
         case 'reg':
-          player.regUser(data);
-          players.push(player);
+          const userInfo = JSON.parse(data);
+          const tempId = player.generateId(userInfo);
+          if (players.findIndex((item: Player) => item.getId() === tempId) === -1) {
+            player.regUser(userInfo, tempId);
+            players.push(player);
+            winners.send(ws);
 
-          winners.send(ws);
+            const updateRooms: string = JSON.stringify({
+              type: 'update_room',
+              id: 0,
+              data: JSON.stringify(rooms),
+            })
 
-          const updateRooms: string = JSON.stringify({
-            type: 'update_room',
-            id: 0,
-            data: JSON.stringify(rooms),
-          })
-
-          ws.send(updateRooms, (err) => {
-            if (err)
-              console.log(err);
-            else 
-              console.log('rooms send');
-          })
+            ws.send(updateRooms, (err) => {
+              if (err)
+                console.log(err);
+              else 
+                console.log('rooms send');
+            })
+          } else {
+            player.sendErrorLogin();
+          }
           break;
         case 'create_room':
           break;
