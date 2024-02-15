@@ -1,6 +1,7 @@
 import { WebSocketServer } from 'ws';
 import { Player } from './Player';
 import { Winners } from './Winners';
+import { Room } from './Room';
 
 const players: Player[] = [];
 const rooms: string[] = [];
@@ -14,7 +15,8 @@ export const gameServer = (): void => {
 
   wss.on('connection', (ws) => {
     const player = new Player(ws);
-  
+    let activeRoom: Room;  
+
     ws.on('message', (message) => {
       const { type, data, id } = JSON.parse(message.toString());
       if (id) {
@@ -47,6 +49,8 @@ export const gameServer = (): void => {
           }
           break;
         case 'create_room':
+          activeRoom = new Room(player);
+          rooms.push(activeRoom);
           break;
         case 'add_user_to_room':
           break;

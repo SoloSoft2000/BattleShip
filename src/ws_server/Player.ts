@@ -26,7 +26,7 @@ export class Player {
 
   generateId({name, password}: RegistrationData): number {
     const hash = createHmac('sha256', 'BattleShip').update(name + password).digest('hex');
-    return parseInt(hash, 10);
+    return parseInt(hash, 16);
   }
 
   regUser(regData: RegistrationData, id: number): void {
