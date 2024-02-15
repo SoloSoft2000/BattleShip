@@ -1,5 +1,10 @@
 import { WebSocketServer } from 'ws';
 import { Player } from './Player';
+import { Winners } from './Winners';
+
+const players: Player[] = [];
+const rooms: string[] = [];
+const winners = new Winners();
 
 export const gameServer = (): void => {
   const wss = new WebSocketServer({
@@ -19,6 +24,22 @@ export const gameServer = (): void => {
       switch (type) {
         case 'reg':
           player.regUser(data);
+          players.push(player);
+
+          winners.send(ws);
+
+          const updateRooms: string = JSON.stringify({
+            type: 'update_room',
+            id: 0,
+            data: JSON.stringify(rooms),
+          })
+
+          ws.send(updateRooms, (err) => {
+            if (err)
+              console.log(err);
+            else 
+              console.log('rooms send');
+          })
           break;
         case 'create_room':
           break;
@@ -33,21 +54,6 @@ export const gameServer = (): void => {
         default:
           break;
       }
-
-      console.log(type, data);
-      
-
-        const winners = [{ name: 'ddd', wins: 1}, { name: 'Eugene', wins: 2 }]; //[]
-
-        const updateWinners: string = JSON.stringify({
-          type: 'update_winners',
-          id: 0,
-          data: JSON.stringify(winners),
-        })
-
-        ws.send(updateWinners, (err) => {
-          console.log(err);          
-        } );
     });
   });
 } ;

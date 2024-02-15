@@ -16,6 +16,14 @@ export class Player {
     this.idPlayer = Date.now();
   }
 
+  getId(): number {
+    return this.idPlayer;
+  }
+  
+  getName(): string {
+    return this.name;
+  }
+
   regUser(regData: RegistrationData): void {
     console.log(regData);
     
