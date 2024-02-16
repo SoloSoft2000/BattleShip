@@ -24,6 +24,10 @@ export class Player {
     return this.name;
   }
 
+  getWS(): WebSocket {
+    return this.ws;
+  }
+
   generateId({name, password}: RegistrationData): number {
     const hash = createHmac('sha256', 'BattleShip').update(name + password).digest('hex');
     return parseInt(hash, 16);

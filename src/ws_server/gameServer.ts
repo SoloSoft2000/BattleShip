@@ -2,9 +2,10 @@ import { WebSocketServer } from 'ws';
 import { Player } from './Player';
 import { Winners } from './Winners';
 import { Room } from './Room';
+import { Rooms } from './Rooms';
 
 const players: Player[] = [];
-const rooms: string[] = [];
+const rooms = new Rooms();
 const winners = new Winners();
 
 export const gameServer = (): void => {
@@ -31,19 +32,7 @@ export const gameServer = (): void => {
             player.regUser(userInfo, tempId);
             players.push(player);
             winners.send(ws);
-
-            const updateRooms: string = JSON.stringify({
-              type: 'update_room',
-              id: 0,
-              data: JSON.stringify(rooms),
-            })
-
-            ws.send(updateRooms, (err) => {
-              if (err)
-                console.log(err);
-              else 
-                console.log('rooms send');
-            })
+            rooms.send(ws);
           } else {
             player.sendErrorLogin();
           }
@@ -51,6 +40,8 @@ export const gameServer = (): void => {
         case 'create_room':
           activeRoom = new Room(player);
           rooms.push(activeRoom);
+          players.forEach((player) => rooms.send(player.getWS()));
+          // rooms.send(ws);
           break;
         case 'add_user_to_room':
           break;

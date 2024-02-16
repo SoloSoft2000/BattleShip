@@ -16,4 +16,16 @@ export class Room {
     }
     return false;
   }
+
+  getId(): number {
+    return this.id;
+  }
+
+  getOwner(): Player {
+    return this.players[0];
+  }
+
+  getPlayerCount(): number {
+    return this.players.length;
+  }
 }

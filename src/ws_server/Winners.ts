@@ -36,7 +36,7 @@ export class Winners {
     }
   }
 
-  getWinners(): rowWinnerDTO[] {
+  private getWinners(): rowWinnerDTO[] {
     const result = this.tableWinners
       .sort((a, b) => b.wins - a.wins)
       .map((row) => { return { name: row.name, wins: row.wins } });
