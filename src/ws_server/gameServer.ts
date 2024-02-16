@@ -3,6 +3,7 @@ import { Player } from './Player';
 import { Winners } from './Winners';
 import { Room } from './Room';
 import { Rooms } from './Rooms';
+import { Game } from './Game';
 
 const players: Player[] = [];
 const rooms = new Rooms();
@@ -16,7 +17,7 @@ export const gameServer = (): void => {
 
   wss.on('connection', (ws) => {
     const player = new Player(ws);
-    let activeRoom: Room;  
+    let activeRoom: Room | undefined;  
 
     ws.on('message', (message) => {
       const { type, data, id } = JSON.parse(message.toString());
@@ -41,9 +42,16 @@ export const gameServer = (): void => {
           activeRoom = new Room(player);
           rooms.push(activeRoom);
           players.forEach((player) => rooms.send(player.getWS()));
-          // rooms.send(ws);
           break;
         case 'add_user_to_room':
+          const { indexRoom } = JSON.parse(data);
+          if (rooms.addUserToRoom(indexRoom, player)) {
+            activeRoom = rooms.getRoomById(indexRoom);
+            if (activeRoom) {
+              players.forEach((player) => rooms.send(player.getWS()));
+              new Game(activeRoom.getOwner(), player);
+            }
+          }
           break;
         case 'add_ships':
           break;

@@ -1,5 +1,6 @@
 import { WebSocket } from 'ws';
 import { Room } from "./Room";
+import { Player } from './Player';
 
 interface rowRoomDTO {
   roomId: number,
@@ -16,6 +17,20 @@ export class Rooms {
     this.rooms.push(room);
   }
 
+  getRoomById(id: number): Room | undefined {
+    return this.rooms.find(room => room.getId() === id);
+  }
+
+  addUserToRoom(idRoom: number, player: Player): boolean {
+    const room = this.getRoomById(idRoom);
+    if (room && room.getPlayerCount() < 2
+      && room.getOwner().getId() !== player.getId()) {
+        room.addUser(player);
+        return true;
+      }
+    return false;
+  }
+  
   private getRooms(): rowRoomDTO[] {
     const result = this.rooms
       .filter((room) => room.getPlayerCount() === 1)
