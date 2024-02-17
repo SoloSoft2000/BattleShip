@@ -1,6 +1,5 @@
 import { WebSocket } from 'ws';
 import { createHmac } from 'crypto';
-import { Winners } from './Winners';
 import { Rooms } from './Rooms';
 import { Room } from './Room';
 import { EventEmitter } from 'events';
@@ -16,14 +15,13 @@ export class Player extends EventEmitter {
   private idPlayer: number = 0;
   private ws: WebSocket;
   private rooms: Rooms;
-  private winners: Winners;
 
-  constructor(ws: WebSocket, rooms: Rooms, winners: Winners) {
+
+  constructor(ws: WebSocket, rooms: Rooms) {
     super();
     this.ws = ws;
 
     this.rooms = rooms;
-    this.winners = winners;
 
     ws.on('message', (message) => {
       this.handleMessage(message.toString());
