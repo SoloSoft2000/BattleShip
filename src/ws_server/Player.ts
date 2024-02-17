@@ -1,19 +1,55 @@
 import { WebSocket } from 'ws';
 import { createHmac } from 'crypto';
+import { Winners } from './Winners';
+import { Rooms } from './Rooms';
+import { Room } from './Room';
+import { EventEmitter } from 'events';
 
 interface RegistrationData {
   name: string,
   password: string
 }
 
-export class Player {
+export class Player extends EventEmitter {
   private name: string = '';
   private password: string = '';
   private idPlayer: number = 0;
   private ws: WebSocket;
+  private rooms: Rooms;
+  private winners: Winners;
 
-  constructor(ws: WebSocket) {
+  constructor(ws: WebSocket, rooms: Rooms, winners: Winners) {
+    super();
     this.ws = ws;
+
+    this.rooms = rooms;
+    this.winners = winners;
+
+    ws.on('message', (message) => {
+      this.handleMessage(message.toString());
+    })
+  }
+
+  handleMessage(message: string): void {
+    const { type, data } = JSON.parse(message.toString());
+    let activeRoom: Room | undefined;
+    switch (type) {
+      case 'create_room':
+        activeRoom = new Room(this);
+        this.rooms.push(activeRoom);
+        console.log('UR-Player');
+        this.emit('update_room');
+        break;
+      case 'add_user_to_room':
+        const { indexRoom } = JSON.parse(data);
+        if (this.rooms.addUserToRoom(indexRoom, this)) {
+          activeRoom = this.rooms.getRoomById(indexRoom);
+          if (activeRoom) {
+            this.emit('start_game', activeRoom);
+        }
+        break;
+      } 
+    }
   }
 
   getId(): number {
@@ -28,16 +64,16 @@ export class Player {
     return this.ws;
   }
 
-  generateId({name, password}: RegistrationData): number {
+  static GenerateId({name, password}: RegistrationData): number {
     const hash = createHmac('sha256', 'BattleShip').update(name + password).digest('hex');
     return parseInt(hash, 16);
   }
 
-  regUser(regData: RegistrationData, id: number): void {
+  regUser(regData: RegistrationData): void {
     this.name = regData.name;
     this.password = regData.password;
 
-    this.idPlayer = id;
+    this.idPlayer = Player.GenerateId(regData);
     const userData = JSON.stringify({
       name: this.name, 
       index: this.idPlayer,
@@ -58,7 +94,7 @@ export class Player {
     } );
   }
 
-  sendErrorLogin(): void {
+  static SendErrorLogin(ws: WebSocket): void {
     const userData = JSON.stringify({
       error: true,
       errorText: 'User is already logged in'
@@ -68,6 +104,6 @@ export class Player {
       id: 0,
       data: userData,
     })
-    this.ws.send(regJson);
+    ws.send(regJson);
   }
 }
