@@ -3,13 +3,14 @@ import { createHmac } from 'crypto';
 import { Winners } from './Winners';
 import { Rooms } from './Rooms';
 import { Room } from './Room';
+import { EventEmitter } from 'events';
 
 interface RegistrationData {
   name: string,
   password: string
 }
 
-export class Player {
+export class Player extends EventEmitter {
   private name: string = '';
   private password: string = '';
   private idPlayer: number = 0;
@@ -18,7 +19,9 @@ export class Player {
   private winners: Winners;
 
   constructor(ws: WebSocket, rooms: Rooms, winners: Winners) {
+    super();
     this.ws = ws;
+
     this.rooms = rooms;
     this.winners = winners;
 
@@ -34,19 +37,18 @@ export class Player {
       case 'create_room':
         activeRoom = new Room(this);
         this.rooms.push(activeRoom);
-
-        // players.forEach((player) => rooms.send(player.getWS()));
+        console.log('UR-Player');
+        this.emit('update_room');
         break;
       case 'add_user_to_room':
         const { indexRoom } = JSON.parse(data);
         if (this.rooms.addUserToRoom(indexRoom, this)) {
           activeRoom = this.rooms.getRoomById(indexRoom);
-          // if (activeRoom) {
-          //   players.forEach((player) => rooms.send(player.getWS()));
-          //   new Game(activeRoom.getOwner(), player);
-          // }
+          if (activeRoom) {
+            this.emit('start_game', activeRoom);
         }
         break;
+      } 
     }
   }
 

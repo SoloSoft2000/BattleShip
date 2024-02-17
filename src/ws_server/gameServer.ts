@@ -2,6 +2,8 @@ import { WebSocketServer } from 'ws';
 import { Player } from './Player';
 import { Winners } from './Winners';
 import { Rooms } from './Rooms';
+import { Room } from './Room';
+import { Game } from './Game';
 
 const players: Player[] = [];
 const rooms = new Rooms();
@@ -26,6 +28,15 @@ export const gameServer = (): void => {
           const tempId = Player.GenerateId(userInfo);
           if (players.findIndex((item: Player) => item.getId() === tempId) === -1) {
             const player = new Player(ws, rooms, winners);
+            player.on('update_room', () => {
+              console.log('UR-server');
+              
+              players.forEach((player) => rooms.send(player.getWS()));
+            })
+            player.on('start_game', (activeRoom: Room) => {
+              players.forEach((player) => rooms.send(player.getWS()));
+              new Game(activeRoom.getOwner(), player);
+            })
             player.regUser(userInfo);
             players.push(player);
             winners.send(ws);
