@@ -29,8 +29,6 @@ export const gameServer = (): void => {
           if (players.findIndex((item: Player) => item.getId() === tempId) === -1) {
             const player = new Player(ws, rooms, winners);
             player.on('update_room', () => {
-              console.log('UR-server');
-              
               players.forEach((player) => rooms.send(player.getWS()));
             })
             player.on('start_game', (activeRoom: Room) => {

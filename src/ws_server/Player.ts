@@ -37,7 +37,6 @@ export class Player extends EventEmitter {
       case 'create_room':
         activeRoom = new Room(this);
         this.rooms.push(activeRoom);
-        console.log('UR-Player');
         this.emit('update_room');
         break;
       case 'add_user_to_room':
