@@ -6,8 +6,8 @@ import { Room } from './Room';
 import { Game } from './Game';
 
 interface UserInfo {
-  name: string,
-  password: string
+  name: string;
+  password: string;
 }
 
 const players: Player[] = [];
@@ -24,7 +24,7 @@ const handleMessage = (message: string, ws: WebSocket): void => {
     default:
       break;
   }
-}
+};
 
 const handleRegistration = (data: string, ws: WebSocket): void => {
   const userInfo = JSON.parse(data);
@@ -39,37 +39,46 @@ const handleRegistration = (data: string, ws: WebSocket): void => {
   players.push(player);
   winners.send(ws);
   rooms.send(ws);
-} 
+};
+
+const sendUpdate = (type: 'Rooms' | 'Winners'): void => {
+  players.forEach((player) => {
+    if (type === 'Rooms') {
+      rooms.send(player.getWS());
+    } else {
+      winners.send(player.getWS());
+    }
+  });
+};
 
 const createPlayer = (userInfo: UserInfo, ws: WebSocket): Player => {
   const player = new Player(ws, rooms);
 
   player.on('update_room', () => {
-    players.forEach((player) => rooms.send(player.getWS()));
+    sendUpdate('Rooms');
   });
 
   player.on('start_game', (activeRoom: Room) => {
-    players.forEach((player) => rooms.send(player.getWS()));
+    sendUpdate('Rooms');
     new Game(activeRoom.getOwner(), player);
   });
 
   player.regUser(userInfo);
   return player;
-}
+};
 
 const isPlayerAlreadyRegistered = (tempId: number): boolean => {
   return players.findIndex((item: Player) => item.getId() === tempId) !== -1;
-}
+};
 
 export const gameServer = (): void => {
   const wss = new WebSocketServer({
     port: 3000,
-    
-  })
+  });
 
   wss.on('connection', (ws) => {
     ws.on('message', (message) => {
       handleMessage(message.toString(), ws);
-    })
+    });
   });
-} ;
+};

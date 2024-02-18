@@ -5,8 +5,8 @@ import { Room } from './Room';
 import { EventEmitter } from 'events';
 
 interface RegistrationData {
-  name: string,
-  password: string
+  name: string;
+  password: string;
 }
 
 export class Player extends EventEmitter {
@@ -16,7 +16,6 @@ export class Player extends EventEmitter {
   private ws: WebSocket;
   private rooms: Rooms;
 
-
   constructor(ws: WebSocket, rooms: Rooms) {
     super();
     this.ws = ws;
@@ -25,7 +24,7 @@ export class Player extends EventEmitter {
 
     ws.on('message', (message) => {
       this.handleMessage(message.toString());
-    })
+    });
   }
 
   handleMessage(message: string): void {
@@ -43,16 +42,16 @@ export class Player extends EventEmitter {
           activeRoom = this.rooms.getRoomById(indexRoom);
           if (activeRoom) {
             this.emit('start_game', activeRoom);
+          }
+          break;
         }
-        break;
-      } 
     }
   }
 
   getId(): number {
     return this.idPlayer;
   }
-  
+
   getName(): string {
     return this.name;
   }
@@ -61,8 +60,10 @@ export class Player extends EventEmitter {
     return this.ws;
   }
 
-  static GenerateId({name, password}: RegistrationData): number {
-    const hash = createHmac('sha256', 'BattleShip').update(name + password).digest('hex');
+  static GenerateId({ name, password }: RegistrationData): number {
+    const hash = createHmac('sha256', 'BattleShip')
+      .update(name + password)
+      .digest('hex');
     return parseInt(hash, 16);
   }
 
@@ -72,35 +73,34 @@ export class Player extends EventEmitter {
 
     this.idPlayer = Player.GenerateId(regData);
     const userData = JSON.stringify({
-      name: this.name, 
+      name: this.name,
       index: this.idPlayer,
       error: false,
-      errorText: ''
+      errorText: '',
     });
 
     const regJson: string = JSON.stringify({
       type: 'reg',
       id: 0,
       data: userData,
-    })
+    });
 
     this.ws.send(regJson, (err) => {
-      if (err)
-        console.log(err);          
+      if (err) console.log(err);
       console.log(`reg send`);
-    } );
+    });
   }
 
   static SendErrorLogin(ws: WebSocket): void {
     const userData = JSON.stringify({
       error: true,
-      errorText: 'User is already logged in'
-    })
+      errorText: 'User is already logged in',
+    });
     const regJson: string = JSON.stringify({
       type: 'reg',
       id: 0,
       data: userData,
-    })
+    });
     ws.send(regJson);
   }
 }

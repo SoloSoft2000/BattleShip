@@ -1,11 +1,11 @@
 interface Ship {
-  type: 'huge' | 'large' | 'medium' | 'small',
-  direction: boolean,
-  length: 4 | 3 | 2 | 1,
+  type: 'huge' | 'large' | 'medium' | 'small';
+  direction: boolean;
+  length: 4 | 3 | 2 | 1;
   position: {
-    x: number,
-    y: number
-  }
+    x: number;
+    y: number;
+  };
 }
 
 export class Field {
@@ -17,7 +17,7 @@ export class Field {
   }
 
   placeShips(ships: Ship[]): void {
-    ships.forEach(ship => {
+    ships.forEach((ship) => {
       const { x, y } = ship.position;
       const direction = ship.direction ? 'vertical' : 'horizontal';
       const length = ship.length;
@@ -34,5 +34,4 @@ export class Field {
     });
     this.hasShips = true;
   }
-
 }
