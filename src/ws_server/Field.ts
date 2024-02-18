@@ -13,7 +13,7 @@ interface Cell {
   hit: boolean;
 }
 
-export type ShotStatus = 'miss'|'killed'|'shot';
+export type ShotStatus = 'miss'|'killed'|'shot'|'already';
 
 export class Field {
   private field: Cell[][];
@@ -67,8 +67,20 @@ export class Field {
     return this.ships.length;
   }
 
+  getCellAlreadyHit(x: number, y: number): boolean {
+    const cell = this.field[y][x];
+    if (cell.hit) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   attack(x: number, y: number): ShotStatus {
     const cell = this.field[y][x];
+    if (cell.hit) {
+      return 'already';
+    }
     this.field[y][x] = {
       ...cell,
       hit: true

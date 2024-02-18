@@ -53,6 +53,29 @@ export class Game {
     if (type === 'attack') {
       this.attack(data);
     }
+    if (type === 'randomAttack') {
+      const { indexPlayer, gameId } = JSON.parse(data);
+      let freeCell;
+      do {
+        const x = Math.floor(Math.random() * 10);
+        const y =  Math.floor(Math.random() * 10);
+        const isAlreadyHit = indexPlayer === this.owner.getId() ?
+          this.oponentField.getCellAlreadyHit(x, y) :
+          this.ownerField.getCellAlreadyHit(x, y);
+          if (!isAlreadyHit) {
+            freeCell = { x, y };
+          }
+      } while (freeCell === undefined)
+
+      const newData = {
+        gameId,
+        indexPlayer,
+        x: freeCell.x,
+        y: freeCell.y
+      }
+      
+      this.attack(JSON.stringify(newData));
+    }
   }
 
   addShips(data: string, isOwner: boolean): void {
@@ -60,11 +83,9 @@ export class Game {
     if (isOwner) {
       this.ownerField.placeShips(ships);
       this.ownerFieldJSON = ships;
-      // console.log(this.ownerField.printField());
     } else {
       this.oponentField.placeShips(ships);
       this.oponentFieldJSON = ships;
-      // console.log(this.oponentField.printField());
     }
     if (this.ownerField.getShipsOnField() && this.oponentField.getShipsOnField()) {
       let sendMessage = JSON.stringify({
@@ -106,14 +127,16 @@ export class Game {
     const isOwner = this.owner.getId() === indexPlayer;
     
     const result = isOwner ? this.oponentField.attack(x, y) : this.ownerField.attack(x, y);
-    
+    if (result === 'already')
+      return;
+
     this.feedback(indexPlayer, x, y, result);
     if (result === 'miss') {
       this.turn(this.owner, isOwner ? this.oponent.getId() : this.owner.getId());
       this.turn(this.oponent, isOwner ? this.oponent.getId() : this.owner.getId());
     } else if (result === 'killed') {
       const neighbourCells = isOwner ? this.oponentField.getNeighbourCells(x, y) : this.ownerField.getNeighbourCells(x, y);
-      // console.log(neighbourCells);
+
       neighbourCells.forEach(cell => {
         this.feedback(indexPlayer, cell.x, cell.y, 'miss');
       })
