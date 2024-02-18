@@ -6,7 +6,6 @@ interface Ship {
     x: number;
     y: number;
   };
-  hitLeft: number;
 }
 
 interface Cell {
@@ -18,7 +17,7 @@ export type ShotStatus = 'miss'|'killed'|'shot';
 
 export class Field {
   private field: Cell[][];
-  private ships: Ship[];
+  private ships: { ship: Ship, hitLeft: number }[];
 
   constructor(size: number = 10) {
     this.field = Array.from( {length: size }, () => Array(size).fill({ship: null, hit: false}));
@@ -48,7 +47,7 @@ export class Field {
         }
       }
 
-      this.ships.push(item)
+      this.ships.push({ship: item, hitLeft: item.length})
     });
   }
 
@@ -64,8 +63,8 @@ export class Field {
     return result;
   }
 
-  getShips(): Ship[] {
-    return this.ships;
+  getShipsOnField(): number {
+    return this.ships.length;
   }
 
   attack(x: number, y: number): ShotStatus {
@@ -73,17 +72,46 @@ export class Field {
     cell.hit = true;
 
     let result = 'miss';
-    
-    if (cell.ship) {
-      cell.ship.hitLeft--;
-      if (cell.ship.hitLeft) {
+    const shipIndex = this.ships.findIndex(s => s.ship === cell.ship)
+    if (shipIndex !== -1) {
+      
+      // console.log();
+      
+      this.ships[shipIndex].hitLeft--;
+      if (this.ships[shipIndex].hitLeft) {
         result = 'shot';
       } else {
         result = 'killed';
-        this.ships = this.ships.filter(s => s !== cell.ship);
+        this.ships = this.ships.filter(s => s.ship !== cell.ship);
       }
     }
 
     return result as ShotStatus;
+  }
+
+  getNeighbourCells(x: number, y: number): { x: number, y: number }[] {
+    const result: { x: number, y: number }[] = [];
+
+    const ship = this.field[y][x].ship;
+
+    if (ship) {
+      const length = ship.length;
+      const direction = ship.direction;
+      const startX = Math.max(0, x - 1);
+      const endX = Math.min(9, direction ? x + length : x + 1);
+      const startY = Math.max(0, y - 1);
+      const endY = Math.min(9, direction ? y + 1 : y + length);
+
+
+      for (let i = startX; i <= endX; i++ ) {
+        for (let j = startY; j < endY; j++) {
+          if (!this.field[i][j].hit) {
+            this.field[i][j].hit = true;
+            result.push({ x: i, y: j });
+          }
+        }
+      }
+    }
+    return result;
   }
 }

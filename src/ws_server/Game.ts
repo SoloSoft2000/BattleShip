@@ -60,13 +60,13 @@ export class Game {
     if (isOwner) {
       this.ownerField.placeShips(ships);
       this.ownerFieldJSON = ships;
-      console.log(this.ownerField.printField());
+      // console.log(this.ownerField.printField());
     } else {
       this.oponentField.placeShips(ships);
       this.oponentFieldJSON = ships;
-      console.log(this.oponentField.printField());
+      // console.log(this.oponentField.printField());
     }
-    if (this.ownerField.getShips().length && this.oponentField.getShips().length) {
+    if (this.ownerField.getShipsOnField() && this.oponentField.getShipsOnField()) {
       let sendMessage = JSON.stringify({
         type: 'start_game',
         id: 0,
@@ -111,7 +111,16 @@ export class Game {
     if (result === 'miss') {
       this.turn(this.owner, isOwner ? this.oponent.getId() : this.owner.getId());
       this.turn(this.oponent, isOwner ? this.oponent.getId() : this.owner.getId());
+    } else if (result === 'killed') {
+      const neighbourCells = isOwner ? this.oponentField.getNeighbourCells(x, y) : this.ownerField.getNeighbourCells(x, y);
+      // console.log(neighbourCells);
+      neighbourCells.forEach(cell => {
+        this.feedback(indexPlayer, cell.x, cell.y, 'miss');
+      })
     }
+
+    console.log( isOwner ? this.oponentField.getShipsOnField() : this.ownerField.getShipsOnField() );
+    
   }
 
   feedback(currentPlayer: number, x: number, y: number, status: ShotStatus): void {
