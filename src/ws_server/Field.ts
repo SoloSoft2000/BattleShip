@@ -69,14 +69,14 @@ export class Field {
 
   attack(x: number, y: number): ShotStatus {
     const cell = this.field[y][x];
-    cell.hit = true;
+    this.field[y][x] = {
+      ...cell,
+      hit: true
+    }
 
     let result = 'miss';
     const shipIndex = this.ships.findIndex(s => s.ship === cell.ship)
     if (shipIndex !== -1) {
-      
-      // console.log();
-      
       this.ships[shipIndex].hitLeft--;
       if (this.ships[shipIndex].hitLeft) {
         result = 'shot';
@@ -97,17 +97,21 @@ export class Field {
     if (ship) {
       const length = ship.length;
       const direction = ship.direction;
-      const startX = Math.max(0, x - 1);
-      const endX = Math.min(9, direction ? x + length : x + 1);
-      const startY = Math.max(0, y - 1);
-      const endY = Math.min(9, direction ? y + 1 : y + length);
+      const startX = Math.max(0, ship.position.x - 1);
+      const endX = Math.min(9, direction ? ship.position.x + 1 : ship.position.x + length);
+      const startY = Math.max(0, ship.position.y - 1);
+      const endY = Math.min(9, direction ? ship.position.y + length : ship.position.y + 1);
 
 
-      for (let i = startX; i <= endX; i++ ) {
-        for (let j = startY; j < endY; j++) {
+      for (let i = startY; i <= endY; i++ ) {
+        for (let j = startX; j <= endX; j++) {
           if (!this.field[i][j].hit) {
-            this.field[i][j].hit = true;
-            result.push({ x: i, y: j });
+            const cell = this.field[i][j];
+            this.field[i][j] = {
+              ...cell,
+              hit: true
+            }
+            result.push({ x: j, y: i });
           }
         }
       }
