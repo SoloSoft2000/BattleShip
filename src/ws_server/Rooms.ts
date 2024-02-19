@@ -25,6 +25,10 @@ export class Rooms {
     return false;
   }
 
+  removeRoom(idRoom: number): void {
+    this.rooms = this.rooms.filter((room) => room.getId() !== idRoom);
+  }
+
   private getRooms(): RowRoomDTO[] {
     const result = this.rooms
       .filter((room) => room.getPlayerCount() === 1)
@@ -49,11 +53,6 @@ export class Rooms {
       data: JSON.stringify(this.getRooms()),
     });
 
-    console.log(message);
-
-    ws.send(message, (err) => {
-      if (err) console.log(err);
-      else console.log('rooms send');
-    });
+    ws.send(message);
   }
 }

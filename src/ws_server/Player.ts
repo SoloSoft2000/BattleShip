@@ -1,6 +1,5 @@
 import { WebSocket } from 'ws';
 import { createHmac } from 'crypto';
-import { Rooms } from './Rooms';
 import { Room } from './Room';
 import { EventEmitter } from 'events';
 import { RegistrationData } from './utils/interfaces';
@@ -10,37 +9,23 @@ export class Player extends EventEmitter {
   private password: string = '';
   private idPlayer: number = 0;
   private ws: WebSocket;
-  private rooms: Rooms;
 
-  constructor(ws: WebSocket, rooms: Rooms) {
+  constructor(ws: WebSocket) {
     super();
     this.ws = ws;
-
-    this.rooms = rooms;
-
-    ws.on('message', (message) => {
-      this.handleMessage(message.toString());
-    });
   }
 
   handleMessage(message: string): void {
     const { type, data } = JSON.parse(message.toString());
-    let activeRoom: Room | undefined;
     switch (type) {
       case 'create_room':
-        activeRoom = new Room(this);
-        this.rooms.push(activeRoom);
-        this.emit('update_room');
+        const activeRoom = new Room(this);
+        this.emit('update_room', activeRoom);
         break;
       case 'add_user_to_room':
-        const { indexRoom } = JSON.parse(data);
-        if (this.rooms.addUserToRoom(indexRoom, this)) {
-          activeRoom = this.rooms.getRoomById(indexRoom);
-          if (activeRoom) {
-            this.emit('start_game', activeRoom);
-          }
-          break;
-        }
+        const idx = JSON.parse(data).indexRoom;
+        this.emit('start_game', idx);
+        break;
     }
   }
 
@@ -81,10 +66,7 @@ export class Player extends EventEmitter {
       data: userData,
     });
 
-    this.ws.send(regJson, (err) => {
-      if (err) console.log(err);
-      console.log(`reg send`);
-    });
+    this.ws.send(regJson);
   }
 
   static SendErrorLogin(ws: WebSocket): void {

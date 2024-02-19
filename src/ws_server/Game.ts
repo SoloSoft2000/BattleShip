@@ -38,8 +38,15 @@ export class Game extends EventEmitter {
         }),
       });
       player.getWS().send(message);
-      player.getWS().on('message', (message) => this.handleMessage(message.toString(), player === this.owner));
     });
+  }
+
+  handleOwner(message: string): void {
+    this.handleMessage(message, true);
+  }
+
+  handleOponent(message: string): void {
+    this.handleMessage(message, false);
   }
 
   handleMessage(message: string, isOwner: boolean): void {
@@ -74,9 +81,13 @@ export class Game extends EventEmitter {
   addShips(data: string, isOwner: boolean): void {
     const { ships } = JSON.parse(data);
     if (isOwner) {
+      console.log('add Owner');
+
       this.ownerField.placeShips(ships);
       this.ownerFieldJSON = ships;
     } else {
+      console.log('add Oponent');
+
       this.oponentField.placeShips(ships);
       this.oponentFieldJSON = ships;
     }
@@ -124,11 +135,9 @@ export class Game extends EventEmitter {
       this.turn(this.oponent, nextPlayer);
     } else if (result === 'killed') {
       const neighbourCells = field.getNeighbourCells(x, y);
-
       neighbourCells.forEach((cell) => {
         this.feedback(indexPlayer, cell.x, cell.y, 'miss');
       });
-
       const isFinish = field.getShipsOnField() === 0;
       if (isFinish) {
         const winPlayer = this.turnId;
@@ -141,7 +150,6 @@ export class Game extends EventEmitter {
 
         this.owner.getWS().send(JSON.stringify(message));
         this.oponent.getWS().send(JSON.stringify(message));
-
         this.emit('finish', winPlayer === this.owner.getId() ? this.owner : this.oponent);
       }
     }

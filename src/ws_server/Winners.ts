@@ -41,9 +41,6 @@ export class Winners {
       id: 0,
       data: JSON.stringify(this.getWinners()),
     };
-    ws.send(JSON.stringify(message), (err) => {
-      if (err) console.log(err);
-      else console.log('winners send');
-    });
+    ws.send(JSON.stringify(message));
   }
 }
