@@ -1,11 +1,7 @@
 import { WebSocket } from 'ws';
 import { Room } from './Room';
 import { Player } from './Player';
-
-interface rowRoomDTO {
-  roomId: number;
-  roomUsers: { name: string; index: number }[];
-}
+import { RowRoomDTO } from './utils/interfaces';
 
 export class Rooms {
   private rooms: Room[] = [];
@@ -29,7 +25,7 @@ export class Rooms {
     return false;
   }
 
-  private getRooms(): rowRoomDTO[] {
+  private getRooms(): RowRoomDTO[] {
     const result = this.rooms
       .filter((room) => room.getPlayerCount() === 1)
       .map((room) => {

@@ -1,19 +1,9 @@
 import { WebSocket } from 'ws';
 import { Player } from './Player';
-
-interface rowWinner {
-  id: number;
-  name: string;
-  wins: number;
-}
-
-interface rowWinnerDTO {
-  name: string;
-  wins: number;
-}
+import { RowWinner, RowWinnerDTO } from './utils/interfaces';
 
 export class Winners {
-  private tableWinners: rowWinner[] = [];
+  private tableWinners: RowWinner[] = [];
 
   constructor() {}
 
@@ -26,6 +16,8 @@ export class Winners {
         wins: 1,
       });
     } else {
+      console.log('win+1');
+
       const wins = this.tableWinners[winIndex].wins + 1;
       this.tableWinners[winIndex] = {
         ...this.tableWinners[winIndex],
@@ -34,7 +26,7 @@ export class Winners {
     }
   }
 
-  private getWinners(): rowWinnerDTO[] {
+  private getWinners(): RowWinnerDTO[] {
     const result = this.tableWinners
       .sort((a, b) => b.wins - a.wins)
       .map((row) => {

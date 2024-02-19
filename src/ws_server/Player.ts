@@ -3,11 +3,7 @@ import { createHmac } from 'crypto';
 import { Rooms } from './Rooms';
 import { Room } from './Room';
 import { EventEmitter } from 'events';
-
-interface RegistrationData {
-  name: string;
-  password: string;
-}
+import { RegistrationData } from './utils/interfaces';
 
 export class Player extends EventEmitter {
   private name: string = '';

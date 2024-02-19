@@ -1,27 +1,16 @@
-interface Ship {
-  type: 'huge' | 'large' | 'medium' | 'small';
-  direction: boolean;
-  length: 4 | 3 | 2 | 1;
-  position: {
-    x: number;
-    y: number;
-  };
-}
-
-interface Cell {
-  ship: Ship | null;
-  hit: boolean;
-}
+import { Ship, Cell } from './utils/interfaces';
 
 export type ShotStatus = 'miss' | 'killed' | 'shot' | 'already';
 
 export class Field {
   private field: Cell[][];
   private ships: { ship: Ship; hitLeft: number }[];
+  private fieldSize: number;
 
   constructor(size: number = 10) {
     this.field = Array.from({ length: size }, () => Array(size).fill({ ship: null, hit: false }));
     this.ships = [];
+    this.fieldSize = size;
   }
 
   placeShips(shipsForParce: Ship[]): void {
@@ -53,8 +42,8 @@ export class Field {
 
   printField(): string {
     let result = '';
-    for (let x = 0; x < 10; x++) {
-      for (let y = 0; y < 10; y++) {
+    for (let x = 0; x < this.fieldSize; x++) {
+      for (let y = 0; y < this.fieldSize; y++) {
         const shipInCell = this.field[x][y].ship;
         result += shipInCell ? shipInCell.length.toString() : '0';
       }
@@ -110,9 +99,9 @@ export class Field {
       const length = ship.length;
       const direction = ship.direction;
       const startX = Math.max(0, ship.position.x - 1);
-      const endX = Math.min(9, direction ? ship.position.x + 1 : ship.position.x + length);
+      const endX = Math.min(this.fieldSize - 1, direction ? ship.position.x + 1 : ship.position.x + length);
       const startY = Math.max(0, ship.position.y - 1);
-      const endY = Math.min(9, direction ? ship.position.y + length : ship.position.y + 1);
+      const endY = Math.min(this.fieldSize - 1, direction ? ship.position.y + length : ship.position.y + 1);
 
       for (let i = startY; i <= endY; i++) {
         for (let j = startX; j <= endX; j++) {

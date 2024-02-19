@@ -3,6 +3,8 @@ import { Player } from './Player';
 import { randomInt, randomUUID } from 'crypto';
 import { EventEmitter } from 'events';
 
+const FIELD_SIZE = 10;
+
 export class Game extends EventEmitter {
   private owner: Player;
   private oponent: Player;
@@ -11,39 +13,33 @@ export class Game extends EventEmitter {
   private oponentField: Field;
   private oponentFieldJSON: string = '';
   private ownerFieldJSON: string = '';
-
   private turnId: number = 0;
 
   constructor(owner: Player, oponent: Player) {
-    super()
+    super();
     this.owner = owner;
     this.oponent = oponent;
     this.gameId = randomUUID();
+    this.ownerField = new Field(FIELD_SIZE);
+    this.oponentField = new Field(FIELD_SIZE);
 
-    this.ownerField = new Field();
-    this.oponentField = new Field();
+    this.initPlayers();
+  }
 
-    let message: string = JSON.stringify({
-      type: 'create_game',
-      id: 0,
-      data: JSON.stringify({
-        idGame: this.gameId,
-        idPlayer: owner.getId(),
-      }),
+  private initPlayers(): void {
+    const playersInGame = [this.owner, this.oponent];
+    playersInGame.forEach((player) => {
+      const message: string = JSON.stringify({
+        type: 'create_game',
+        id: 0,
+        data: JSON.stringify({
+          idGame: this.gameId,
+          idPlayer: player.getId(),
+        }),
+      });
+      player.getWS().send(message);
+      player.getWS().on('message', (message) => this.handleMessage(message.toString(), player === this.owner));
     });
-    owner.getWS().send(message);
-    message = JSON.stringify({
-      type: 'create_game',
-      id: 0,
-      data: JSON.stringify({
-        idGame: this.gameId,
-        idPlayer: oponent.getId(),
-      }),
-    });
-    oponent.getWS().send(message);
-
-    owner.getWS().on('message', (message) => this.handleMessage(message.toString(), true));
-    oponent.getWS().on('message', (message) => this.handleMessage(message.toString(), false));
   }
 
   handleMessage(message: string, isOwner: boolean): void {
@@ -55,29 +51,24 @@ export class Game extends EventEmitter {
       this.attack(data);
     }
     if (type === 'randomAttack') {
-      const { indexPlayer, gameId } = JSON.parse(data);
-      let freeCell;
-      do {
-        const x = randomInt(0, 10);
-        const y = randomInt(0, 10);
-        const isAlreadyHit =
-          indexPlayer === this.owner.getId()
-            ? this.oponentField.getCellAlreadyHit(x, y)
-            : this.ownerField.getCellAlreadyHit(x, y);
-        if (!isAlreadyHit) {
-          freeCell = { x, y };
-        }
-      } while (freeCell === undefined);
-
-      const newData = {
-        gameId,
-        indexPlayer,
-        x: freeCell.x,
-        y: freeCell.y,
-      };
-
-      this.attack(JSON.stringify(newData));
+      this.randomAttack(data);
     }
+  }
+
+  randomAttack(data: string): void {
+    const { indexPlayer, gameId } = JSON.parse(data);
+    const field = indexPlayer === this.owner.getId() ? this.oponentField : this.ownerField;
+
+    let freeCell;
+    do {
+      const x = randomInt(0, FIELD_SIZE - 1);
+      const y = randomInt(0, FIELD_SIZE - 1);
+      const isAlreadyHit = field.getCellAlreadyHit(x, y);
+      if (!isAlreadyHit) freeCell = { x, y };
+    } while (!freeCell);
+
+    const newData = { gameId, indexPlayer, x: freeCell.x, y: freeCell.y };
+    this.attack(JSON.stringify(newData));
   }
 
   addShips(data: string, isOwner: boolean): void {
@@ -90,23 +81,18 @@ export class Game extends EventEmitter {
       this.oponentFieldJSON = ships;
     }
     if (this.ownerField.getShipsOnField() && this.oponentField.getShipsOnField()) {
-      let sendMessage = JSON.stringify({
-        type: 'start_game',
-        id: 0,
-        data: JSON.stringify({ ships: this.ownerFieldJSON }),
-        currentPlayerIndex: this.owner.getId(),
+      const playersInGame = [this.owner, this.oponent];
+      playersInGame.forEach((player) => {
+        const fieldJSON = player === this.owner ? this.ownerFieldJSON : this.oponentFieldJSON;
+        const message = JSON.stringify({
+          type: 'start_game',
+          id: 0,
+          data: JSON.stringify({ ships: fieldJSON }),
+          currentPlayerIndex: player.getId(),
+        });
+        player.getWS().send(message);
+        this.turn(player, this.owner.getId());
       });
-      this.owner.getWS().send(sendMessage);
-      this.turn(this.owner, this.owner.getId());
-
-      sendMessage = JSON.stringify({
-        type: 'start_game',
-        id: 0,
-        data: JSON.stringify({ ships: this.oponentFieldJSON }),
-        currentPlayerIndex: this.oponent.getId(),
-      });
-      this.oponent.getWS().send(sendMessage);
-      this.turn(this.oponent, this.owner.getId());
     }
   }
 
@@ -125,40 +111,39 @@ export class Game extends EventEmitter {
     if (this.turnId !== indexPlayer) {
       return;
     }
-
     const isOwner = this.owner.getId() === indexPlayer;
+    const field = isOwner ? this.oponentField : this.ownerField;
 
-    const result = isOwner ? this.oponentField.attack(x, y) : this.ownerField.attack(x, y);
+    const result = field.attack(x, y);
     if (result === 'already') return;
 
     this.feedback(indexPlayer, x, y, result);
     if (result === 'miss') {
-      this.turn(this.owner, isOwner ? this.oponent.getId() : this.owner.getId());
-      this.turn(this.oponent, isOwner ? this.oponent.getId() : this.owner.getId());
+      const nextPlayer = isOwner ? this.oponent.getId() : this.owner.getId();
+      this.turn(this.owner, nextPlayer);
+      this.turn(this.oponent, nextPlayer);
     } else if (result === 'killed') {
-      const neighbourCells = isOwner
-        ? this.oponentField.getNeighbourCells(x, y)
-        : this.ownerField.getNeighbourCells(x, y);
+      const neighbourCells = field.getNeighbourCells(x, y);
 
       neighbourCells.forEach((cell) => {
         this.feedback(indexPlayer, cell.x, cell.y, 'miss');
       });
-    }
 
-    const isFinish = isOwner ? this.oponentField.getShipsOnField() === 0 : this.ownerField.getShipsOnField() === 0;
-    if (isFinish) {
-      const winPlayer = this.turnId;
-      const data = { winPlayer };
-      const message = {
-        type: 'finish',
-        data: JSON.stringify(data),
-        id: 0,
+      const isFinish = field.getShipsOnField() === 0;
+      if (isFinish) {
+        const winPlayer = this.turnId;
+        const data = { winPlayer };
+        const message = {
+          type: 'finish',
+          data: JSON.stringify(data),
+          id: 0,
+        };
+
+        this.owner.getWS().send(JSON.stringify(message));
+        this.oponent.getWS().send(JSON.stringify(message));
+
+        this.emit('finish', winPlayer === this.owner.getId() ? this.owner : this.oponent);
       }
-
-      this.owner.getWS().send(JSON.stringify(message));
-      this.oponent.getWS().send(JSON.stringify(message));
-
-      this.emit('finish', winPlayer === this.owner.getId() ? this.owner : this.oponent);
     }
   }
 

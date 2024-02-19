@@ -4,11 +4,7 @@ import { Winners } from './Winners';
 import { Rooms } from './Rooms';
 import { Room } from './Room';
 import { Game } from './Game';
-
-interface UserInfo {
-  name: string;
-  password: string;
-}
+import { RegistrationData } from './utils/interfaces';
 
 const players: Player[] = [];
 const rooms = new Rooms();
@@ -51,7 +47,7 @@ const sendUpdate = (type: 'Rooms' | 'Winners'): void => {
   });
 };
 
-const createPlayer = (userInfo: UserInfo, ws: WebSocket): Player => {
+const createPlayer = (userInfo: RegistrationData, ws: WebSocket): Player => {
   const player = new Player(ws, rooms);
 
   player.on('update_room', () => {
@@ -62,10 +58,12 @@ const createPlayer = (userInfo: UserInfo, ws: WebSocket): Player => {
     sendUpdate('Rooms');
     const game = new Game(activeRoom.getOwner(), player);
     game.on('finish', (winPlayer: Player) => {
+      console.log('finish game');
+
       winners.addWinner(winPlayer);
       sendUpdate('Winners');
       sendUpdate('Rooms');
-    })
+    });
   });
 
   player.regUser(userInfo);
