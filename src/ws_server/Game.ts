@@ -21,7 +21,6 @@ export class Game {
     this.ownerField = new Field();
     this.oponentField = new Field();
 
-    
     let message: string = JSON.stringify({
       type: 'create_game',
       id: 0,
@@ -58,22 +57,23 @@ export class Game {
       let freeCell;
       do {
         const x = Math.floor(Math.random() * 10);
-        const y =  Math.floor(Math.random() * 10);
-        const isAlreadyHit = indexPlayer === this.owner.getId() ?
-          this.oponentField.getCellAlreadyHit(x, y) :
-          this.ownerField.getCellAlreadyHit(x, y);
-          if (!isAlreadyHit) {
-            freeCell = { x, y };
-          }
-      } while (freeCell === undefined)
+        const y = Math.floor(Math.random() * 10);
+        const isAlreadyHit =
+          indexPlayer === this.owner.getId()
+            ? this.oponentField.getCellAlreadyHit(x, y)
+            : this.ownerField.getCellAlreadyHit(x, y);
+        if (!isAlreadyHit) {
+          freeCell = { x, y };
+        }
+      } while (freeCell === undefined);
 
       const newData = {
         gameId,
         indexPlayer,
         x: freeCell.x,
-        y: freeCell.y
-      }
-      
+        y: freeCell.y,
+      };
+
       this.attack(JSON.stringify(newData));
     }
   }
@@ -112,8 +112,8 @@ export class Game {
     this.turnId = playIndex;
     const message = JSON.stringify({
       type: 'turn',
-      data: JSON.stringify({currentPlayer: playIndex})
-    })
+      data: JSON.stringify({ currentPlayer: playIndex }),
+    });
 
     player.getWS().send(message);
   }
@@ -125,38 +125,38 @@ export class Game {
     }
 
     const isOwner = this.owner.getId() === indexPlayer;
-    
+
     const result = isOwner ? this.oponentField.attack(x, y) : this.ownerField.attack(x, y);
-    if (result === 'already')
-      return;
+    if (result === 'already') return;
 
     this.feedback(indexPlayer, x, y, result);
     if (result === 'miss') {
       this.turn(this.owner, isOwner ? this.oponent.getId() : this.owner.getId());
       this.turn(this.oponent, isOwner ? this.oponent.getId() : this.owner.getId());
     } else if (result === 'killed') {
-      const neighbourCells = isOwner ? this.oponentField.getNeighbourCells(x, y) : this.ownerField.getNeighbourCells(x, y);
+      const neighbourCells = isOwner
+        ? this.oponentField.getNeighbourCells(x, y)
+        : this.ownerField.getNeighbourCells(x, y);
 
-      neighbourCells.forEach(cell => {
+      neighbourCells.forEach((cell) => {
         this.feedback(indexPlayer, cell.x, cell.y, 'miss');
-      })
+      });
     }
 
-    console.log( isOwner ? this.oponentField.getShipsOnField() : this.ownerField.getShipsOnField() );
-    
+    console.log(isOwner ? this.oponentField.getShipsOnField() : this.ownerField.getShipsOnField());
   }
 
   feedback(currentPlayer: number, x: number, y: number, status: ShotStatus): void {
-    const data = { 
+    const data = {
       position: { x, y },
       currentPlayer,
-      status
+      status,
     };
     const message = {
       type: 'attack',
       data: JSON.stringify(data),
-      id: 0
-    }
+      id: 0,
+    };
     this.owner.getWS().send(JSON.stringify(message));
     this.oponent.getWS().send(JSON.stringify(message));
   }
