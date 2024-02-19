@@ -1,8 +1,9 @@
 import { Field, ShotStatus } from './Field';
 import { Player } from './Player';
 import { randomInt, randomUUID } from 'crypto';
+import { EventEmitter } from 'events';
 
-export class Game {
+export class Game extends EventEmitter {
   private owner: Player;
   private oponent: Player;
   private gameId: string;
@@ -14,6 +15,7 @@ export class Game {
   private turnId: number = 0;
 
   constructor(owner: Player, oponent: Player) {
+    super()
     this.owner = owner;
     this.oponent = oponent;
     this.gameId = randomUUID();
@@ -143,7 +145,21 @@ export class Game {
       });
     }
 
-    console.log(isOwner ? this.oponentField.getShipsOnField() : this.ownerField.getShipsOnField());
+    const isFinish = isOwner ? this.oponentField.getShipsOnField() === 0 : this.ownerField.getShipsOnField() === 0;
+    if (isFinish) {
+      const winPlayer = this.turnId;
+      const data = { winPlayer };
+      const message = {
+        type: 'finish',
+        data: JSON.stringify(data),
+        id: 0,
+      }
+
+      this.owner.getWS().send(JSON.stringify(message));
+      this.oponent.getWS().send(JSON.stringify(message));
+
+      this.emit('finish', winPlayer === this.owner.getId() ? this.owner : this.oponent);
+    }
   }
 
   feedback(currentPlayer: number, x: number, y: number, status: ShotStatus): void {

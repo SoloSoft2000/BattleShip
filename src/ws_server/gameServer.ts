@@ -60,7 +60,12 @@ const createPlayer = (userInfo: UserInfo, ws: WebSocket): Player => {
 
   player.on('start_game', (activeRoom: Room) => {
     sendUpdate('Rooms');
-    new Game(activeRoom.getOwner(), player);
+    const game = new Game(activeRoom.getOwner(), player);
+    game.on('finish', (winPlayer: Player) => {
+      winners.addWinner(winPlayer);
+      sendUpdate('Winners');
+      sendUpdate('Rooms');
+    })
   });
 
   player.regUser(userInfo);

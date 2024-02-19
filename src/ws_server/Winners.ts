@@ -13,10 +13,7 @@ interface rowWinnerDTO {
 }
 
 export class Winners {
-  private tableWinners: rowWinner[] = [
-    { id: 123, name: 'Eugene', wins: 2 }, // example
-    { id: 423, name: 'EugeneS', wins: 3 }, // example
-  ];
+  private tableWinners: rowWinner[] = [];
 
   constructor() {}
 
@@ -29,9 +26,10 @@ export class Winners {
         wins: 1,
       });
     } else {
+      const wins = this.tableWinners[winIndex].wins + 1;
       this.tableWinners[winIndex] = {
         ...this.tableWinners[winIndex],
-        wins: this.tableWinners[winIndex].wins++,
+        wins,
       };
     }
   }
