@@ -1,6 +1,6 @@
 import { Field, ShotStatus } from './Field';
 import { Player } from './Player';
-import { v4 as uuidv4 } from 'uuid';
+import { randomInt, randomUUID } from 'crypto';
 
 export class Game {
   private owner: Player;
@@ -16,7 +16,7 @@ export class Game {
   constructor(owner: Player, oponent: Player) {
     this.owner = owner;
     this.oponent = oponent;
-    this.gameId = uuidv4();
+    this.gameId = randomUUID();
 
     this.ownerField = new Field();
     this.oponentField = new Field();
@@ -56,8 +56,8 @@ export class Game {
       const { indexPlayer, gameId } = JSON.parse(data);
       let freeCell;
       do {
-        const x = Math.floor(Math.random() * 10);
-        const y = Math.floor(Math.random() * 10);
+        const x = randomInt(0, 10);
+        const y = randomInt(0, 10);
         const isAlreadyHit =
           indexPlayer === this.owner.getId()
             ? this.oponentField.getCellAlreadyHit(x, y)
