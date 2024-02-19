@@ -70,8 +70,10 @@ const createPlayer = (userInfo: RegistrationData, ws: WebSocket): Player => {
   const player = new Player(ws);
 
   player.on('update_room', (room: Room) => {
-    rooms.push(room);
-    sendUpdate('Rooms');
+    if (!rooms.isUserHasRoom(player)) {
+      rooms.push(room);
+      sendUpdate('Rooms');
+    }
   });
 
   player.on('start_game', (activeRoomIndex: number) => {
