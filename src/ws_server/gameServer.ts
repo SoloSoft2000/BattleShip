@@ -70,7 +70,7 @@ const createPlayer = (userInfo: RegistrationData, ws: WebSocket): Player => {
   const player = new Player(ws);
 
   player.on('update_room', (room: Room) => {
-    if (!rooms.isUserHasRoom(player)) {
+    if (rooms.getRoomByOwner(player) === -1) {
       rooms.push(room);
       sendUpdate('Rooms');
     }
@@ -80,6 +80,10 @@ const createPlayer = (userInfo: RegistrationData, ws: WebSocket): Player => {
     const activeRoom = rooms.getRoomById(activeRoomIndex);
     if (activeRoom) {
       if (rooms.addUserToRoom(activeRoomIndex, player)) {
+        const playerHasRoom = rooms.getRoomByOwner(player);
+        if ( playerHasRoom !== -1) {
+          rooms.removeRoom(playerHasRoom);
+        }
         sendUpdate('Rooms');
         const owner = activeRoom.getOwner();
         const game: Game | undefined = new Game(owner, player);

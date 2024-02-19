@@ -16,10 +16,11 @@ export class Rooms {
     return this.rooms.find((room) => room.getId() === id);
   }
 
-  isUserHasRoom(player: Player): boolean {
-    if (this.rooms.find((room) => room.getOwner() === player))
-      return true;
-    return false;
+  getRoomByOwner(player: Player): number {
+    const room = this.rooms.find((room) => room.getOwner() === player);
+    if (room) 
+      return room.getId();
+    return -1;
   }
 
   addUserToRoom(idRoom: number, player: Player): boolean {
