@@ -14,44 +14,23 @@ export class Field {
   }
 
   placeShips(shipsForParce: Ship[]): void {
-    console.log(shipsForParce);
-    
     shipsForParce.forEach((item) => {
       const { x, y } = item.position;
 
-      const direction = item.direction ? 'vertical' : 'horizontal';
+      const direction = item.direction;
       const length = Number(item.length);
 
-      if (direction === 'horizontal') {
-        for (let i = 0; i < length; i++) {
-          this.field[y][x + i] = {
-            ship: item,
-            hit: false,
-          };
-        }
-      } else {
-        for (let i = 0; i < length; i++) {
-          this.field[y + i][x] = {
-            ship: item,
-            hit: false,
-          };
-        }
+      for (let i = 0; i < length; i++) {
+        const curX = direction ? x + i : x;
+        const curY = direction ? y : y + i;
+        this.field[curX][curY] = {
+          ship: item,
+          hit: false,
+        };
       }
 
       this.ships.push({ ship: item, hitLeft: item.length });
     });
-  }
-
-  printField(): string {
-    let result = '';
-    for (let x = 0; x < this.fieldSize; x++) {
-      for (let y = 0; y < this.fieldSize; y++) {
-        const shipInCell = this.field[x][y].ship;
-        result += shipInCell ? shipInCell.length.toString() : '0';
-      }
-      result += '\n';
-    }
-    return result;
   }
 
   getShipsOnField(): number {
@@ -59,7 +38,7 @@ export class Field {
   }
 
   getCellAlreadyHit(x: number, y: number): boolean {
-    const cell = this.field[y][x];
+    const cell = this.field[x][y];
     if (cell.hit) {
       return true;
     } else {
@@ -68,11 +47,11 @@ export class Field {
   }
 
   attack(x: number, y: number): ShotStatus {
-    const cell = this.field[y][x];
+    const cell = this.field[x][y];
     if (cell.hit) {
       return 'already';
     }
-    this.field[y][x] = {
+    this.field[x][y] = {
       ...cell,
       hit: true,
     };
@@ -95,7 +74,7 @@ export class Field {
   getNeighbourCells(x: number, y: number): { x: number; y: number }[] {
     const result: { x: number; y: number }[] = [];
 
-    const ship = this.field[y][x].ship;
+    const ship = this.field[x][y].ship;
 
     if (ship) {
       const length = ship.length;
@@ -105,15 +84,15 @@ export class Field {
       const startY = Math.max(0, ship.position.y - 1);
       const endY = Math.min(this.fieldSize - 1, direction ? ship.position.y + length : ship.position.y + 1);
 
-      for (let i = startY; i <= endY; i++) {
-        for (let j = startX; j <= endX; j++) {
+      for (let i = startX; i <= endX; i++) {
+        for (let j = startY; j <= endY; j++) {
           if (!this.field[i][j].hit) {
             const cell = this.field[i][j];
             this.field[i][j] = {
               ...cell,
               hit: true,
             };
-            result.push({ x: j, y: i });
+            result.push({ x: i, y: j });
           }
         }
       }

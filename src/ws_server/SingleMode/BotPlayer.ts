@@ -70,8 +70,6 @@ export class BotPlayer extends EventEmitter implements GamePlayer {
       id: 0,
       data: JSON.stringify(dataToSend),
     };
-    console.log(dataToSend.ships);
-    
     this.emit('message', JSON.stringify(msg));
   }
 

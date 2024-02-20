@@ -44,8 +44,6 @@ export class Game extends EventEmitter {
   }
 
   handleOponent(message: string): void {
-    console.log('oponent', message);
-    
     this.handleMessage(message, false);
   }
 
