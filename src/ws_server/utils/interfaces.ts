@@ -1,3 +1,5 @@
+import { WebSocket } from "ws";
+
 export interface Ship {
   type: 'huge' | 'large' | 'medium' | 'small';
   direction: boolean;
@@ -32,4 +34,10 @@ export interface RowWinner {
 export interface RowWinnerDTO {
   name: string;
   wins: number;
+}
+
+export interface GamePlayer {
+  getId(): number;
+  getWS(): WebSocket | { send: (message: string) => void };
+  getName(): string;
 }

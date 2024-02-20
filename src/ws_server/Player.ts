@@ -2,9 +2,11 @@ import { WebSocket } from 'ws';
 import { createHmac } from 'crypto';
 import { Room } from './Room';
 import { EventEmitter } from 'events';
-import { RegistrationData } from './utils/interfaces';
+import { GamePlayer, RegistrationData } from './utils/interfaces';
+import { BotPlayer } from './BotPlayer';
+import { Game } from './Game';
 
-export class Player extends EventEmitter {
+export class Player extends EventEmitter implements GamePlayer {
   private name: string = '';
   private password: string = '';
   private idPlayer: number = 0;
@@ -25,6 +27,22 @@ export class Player extends EventEmitter {
       case 'add_user_to_room':
         const idx = JSON.parse(data).indexRoom;
         this.emit('start_game', idx);
+        break;
+      case 'single_play':
+        const bot = new BotPlayer(this.name);
+        const game = new Game(this, bot);
+
+        const handlerOwner = (msg: string): void => game.handleOwner(msg);
+        const handlerOponent = (msg: string): void => game.handleOponent(msg);
+
+        this.getWS().on('message', handlerOwner);
+        bot.on('message', handlerOponent);
+
+        game.on('finish', (winPlayer: GamePlayer) => {
+          this.emit('finish_bot', winPlayer);
+        });
+        
+        game.start();
         break;
     }
   }

@@ -2,12 +2,13 @@ import { Field, ShotStatus } from './Field';
 import { Player } from './Player';
 import { randomInt, randomUUID } from 'crypto';
 import { EventEmitter } from 'events';
+import { GamePlayer } from './utils/interfaces';
 
 const FIELD_SIZE = 10;
 
 export class Game extends EventEmitter {
   private owner: Player;
-  private oponent: Player;
+  private oponent: GamePlayer;
   private gameId: string;
   private ownerField: Field;
   private oponentField: Field;
@@ -15,18 +16,16 @@ export class Game extends EventEmitter {
   private ownerFieldJSON: string = '';
   private turnId: number = 0;
 
-  constructor(owner: Player, oponent: Player) {
+  constructor(owner: Player, oponent: GamePlayer) {
     super();
     this.owner = owner;
     this.oponent = oponent;
     this.gameId = randomUUID();
     this.ownerField = new Field(FIELD_SIZE);
     this.oponentField = new Field(FIELD_SIZE);
-
-    this.initPlayers();
   }
 
-  private initPlayers(): void {
+  start(): void {
     const playersInGame = [this.owner, this.oponent];
     playersInGame.forEach((player) => {
       const message: string = JSON.stringify({
@@ -46,6 +45,8 @@ export class Game extends EventEmitter {
   }
 
   handleOponent(message: string): void {
+    console.log('oponent', message);
+    
     this.handleMessage(message, false);
   }
 
@@ -107,7 +108,7 @@ export class Game extends EventEmitter {
     }
   }
 
-  turn(player: Player, playIndex: number): void {
+  turn(player: GamePlayer, playIndex: number): void {
     this.turnId = playIndex;
     const message = JSON.stringify({
       type: 'turn',

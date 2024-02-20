@@ -104,6 +104,8 @@ const createPlayer = (userInfo: RegistrationData, ws: WebSocket): Player => {
           sendUpdate('Winners');
           game.removeAllListeners();
         });
+
+        game.start();
       }
     }
   });
