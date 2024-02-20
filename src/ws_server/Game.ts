@@ -3,8 +3,7 @@ import { Player } from './Player';
 import { randomInt, randomUUID } from 'crypto';
 import { EventEmitter } from 'events';
 import { GamePlayer } from './utils/interfaces';
-
-const FIELD_SIZE = 10;
+import { FIELD_SIZE } from './utils/consts';
 
 export class Game extends EventEmitter {
   private owner: Player;

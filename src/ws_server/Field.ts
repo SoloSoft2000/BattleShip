@@ -14,6 +14,8 @@ export class Field {
   }
 
   placeShips(shipsForParce: Ship[]): void {
+    console.log(shipsForParce);
+    
     shipsForParce.forEach((item) => {
       const { x, y } = item.position;
 

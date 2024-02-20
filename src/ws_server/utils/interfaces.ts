@@ -3,7 +3,7 @@ import { WebSocket } from "ws";
 export interface Ship {
   type: 'huge' | 'large' | 'medium' | 'small';
   direction: boolean;
-  length: 4 | 3 | 2 | 1;
+  length: number;
   position: {
     x: number;
     y: number;

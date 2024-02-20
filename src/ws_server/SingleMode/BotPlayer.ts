@@ -1,5 +1,6 @@
-import { GamePlayer, Ship } from './utils/interfaces';
+import { GamePlayer } from '../utils/interfaces';
 import { EventEmitter } from 'events';
+import { addShips } from './addShips';
 
 export class BotPlayer extends EventEmitter implements GamePlayer {
   private name: string;
@@ -62,13 +63,15 @@ export class BotPlayer extends EventEmitter implements GamePlayer {
     const dataToSend = {
       gameId: this.idGame,
       indexPlayer: this.idPlayer,
-      ships: this.addShip(),
+      ships: addShips(),
     };
     const msg = {
       type: 'add_ships',
       id: 0,
       data: JSON.stringify(dataToSend),
     };
+    console.log(dataToSend.ships);
+    
     this.emit('message', JSON.stringify(msg));
   }
 
@@ -90,101 +93,5 @@ export class BotPlayer extends EventEmitter implements GamePlayer {
 
   getName(): string {
     return this.name;
-  }
-
-  private addShip(): Ship[] {
-    const result: Ship[] = [
-      {
-        position: {
-          x: 5,
-          y: 5,
-        },
-        direction: false,
-        type: 'huge',
-        length: 4,
-      },
-      {
-        position: {
-          x: 5,
-          y: 0,
-        },
-        direction: true,
-        type: 'large',
-        length: 3,
-      },
-      {
-        position: {
-          x: 7,
-          y: 0,
-        },
-        direction: true,
-        type: 'large',
-        length: 3,
-      },
-      {
-        position: {
-          x: 1,
-          y: 7,
-        },
-        direction: true,
-        type: 'medium',
-        length: 2,
-      },
-      {
-        position: {
-          x: 8,
-          y: 7,
-        },
-        direction: true,
-        type: 'medium',
-        length: 2,
-      },
-      {
-        position: {
-          x: 4,
-          y: 8,
-        },
-        direction: false,
-        type: 'medium',
-        length: 2,
-      },
-      {
-        position: {
-          x: 0,
-          y: 0,
-        },
-        direction: false,
-        type: 'small',
-        length: 1,
-      },
-      {
-        position: {
-          x: 2,
-          y: 1,
-        },
-        direction: false,
-        type: 'small',
-        length: 1,
-      },
-      {
-        position: {
-          x: 2,
-          y: 4,
-        },
-        direction: false,
-        type: 'small',
-        length: 1,
-      },
-      {
-        type: 'small',
-        direction: false,
-        length: 1,
-        position: {
-          x: 0,
-          y: 2,
-        },
-      },
-    ];
-    return result;
   }
 }

@@ -3,7 +3,7 @@ import { createHmac } from 'crypto';
 import { Room } from './Room';
 import { EventEmitter } from 'events';
 import { GamePlayer, RegistrationData } from './utils/interfaces';
-import { BotPlayer } from './BotPlayer';
+import { BotPlayer } from './SingleMode/BotPlayer';
 import { Game } from './Game';
 
 export class Player extends EventEmitter implements GamePlayer {
