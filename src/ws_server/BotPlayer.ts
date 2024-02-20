@@ -24,7 +24,7 @@ export class BotPlayer extends EventEmitter implements GamePlayer {
       const { currentPlayer } = JSON.parse(data);
       if (currentPlayer === this.idPlayer) {
         this.ourHit = true;
-        this.attack();
+        setTimeout(() => this.attack(), 2500); // Time for think
       } else {
         this.ourHit = false;
       }
@@ -36,7 +36,9 @@ export class BotPlayer extends EventEmitter implements GamePlayer {
         console.log('save data after attack' ,status);
       }
       if (status !== 'miss' && this.ourHit) {
-        this.attack();
+        setTimeout(() => {
+          this.attack()
+        }, 2500); // Time for think
       }
       return;
     }
