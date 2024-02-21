@@ -2,12 +2,12 @@ import { Field, ShotStatus } from './Field';
 import { Player } from './Player';
 import { randomInt, randomUUID } from 'crypto';
 import { EventEmitter } from 'events';
-
-const FIELD_SIZE = 10;
+import { GamePlayer } from './utils/interfaces';
+import { FIELD_SIZE } from './utils/consts';
 
 export class Game extends EventEmitter {
   private owner: Player;
-  private oponent: Player;
+  private oponent: GamePlayer;
   private gameId: string;
   private ownerField: Field;
   private oponentField: Field;
@@ -15,18 +15,16 @@ export class Game extends EventEmitter {
   private ownerFieldJSON: string = '';
   private turnId: number = 0;
 
-  constructor(owner: Player, oponent: Player) {
+  constructor(owner: Player, oponent: GamePlayer) {
     super();
     this.owner = owner;
     this.oponent = oponent;
     this.gameId = randomUUID();
     this.ownerField = new Field(FIELD_SIZE);
     this.oponentField = new Field(FIELD_SIZE);
-
-    this.initPlayers();
   }
 
-  private initPlayers(): void {
+  start(): void {
     const playersInGame = [this.owner, this.oponent];
     playersInGame.forEach((player) => {
       const message: string = JSON.stringify({
@@ -68,8 +66,8 @@ export class Game extends EventEmitter {
 
     let freeCell;
     do {
-      const x = randomInt(0, FIELD_SIZE - 1);
-      const y = randomInt(0, FIELD_SIZE - 1);
+      const x = randomInt(0, FIELD_SIZE );
+      const y = randomInt(0, FIELD_SIZE );
       const isAlreadyHit = field.getCellAlreadyHit(x, y);
       if (!isAlreadyHit) freeCell = { x, y };
     } while (!freeCell);
@@ -107,7 +105,7 @@ export class Game extends EventEmitter {
     }
   }
 
-  turn(player: Player, playIndex: number): void {
+  turn(player: GamePlayer, playIndex: number): void {
     this.turnId = playIndex;
     const message = JSON.stringify({
       type: 'turn',

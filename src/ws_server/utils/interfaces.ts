@@ -1,11 +1,15 @@
+import { WebSocket } from "ws";
+
+export interface Position {
+  x: number,
+  y: number
+}
+
 export interface Ship {
   type: 'huge' | 'large' | 'medium' | 'small';
   direction: boolean;
-  length: 4 | 3 | 2 | 1;
-  position: {
-    x: number;
-    y: number;
-  };
+  length: number;
+  position: Position
 }
 
 export interface Cell {
@@ -32,4 +36,10 @@ export interface RowWinner {
 export interface RowWinnerDTO {
   name: string;
   wins: number;
+}
+
+export interface GamePlayer {
+  getId(): number;
+  getWS(): WebSocket | { send: (message: string) => void };
+  getName(): string;
 }
