@@ -27,8 +27,8 @@ export const addShips = (): Ship[] => {
   const testPosition = (length: number, pos: Position): boolean => {
     const { x, y, direction } = pos;
     
-    if (!direction && x + length >= FIELD_SIZE) return false;
-    if (direction && y + length >= FIELD_SIZE) return false;
+    if (!direction && x + length > FIELD_SIZE) return false;
+    if (direction && y + length > FIELD_SIZE) return false;
 
     const startX = Math.max(0, x - 1);
     const endX = Math.min(FIELD_SIZE - 1, direction ? x + 1 : x + length);
@@ -74,10 +74,15 @@ export const addShips = (): Ship[] => {
     result.push(newShip);
   });
 
+  let print = ' |0|1|2|3|4|5|6|7|8|9|\n';
   for (let i = 0; i < field.length; i++) {
-    const row = field[i].join('|');
-    console.log(i, row);
+    print += `${i}|`;
+    for (let j = 0; j <field.length; j++) {
+      print += field[j][i] + '|'
+    }
+    print += '\n';
   }
+  console.log(print);
   
   return result;
 };
