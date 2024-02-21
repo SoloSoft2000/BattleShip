@@ -1,13 +1,15 @@
 import { WebSocket } from "ws";
 
+export interface Position {
+  x: number,
+  y: number
+}
+
 export interface Ship {
   type: 'huge' | 'large' | 'medium' | 'small';
   direction: boolean;
   length: number;
-  position: {
-    x: number;
-    y: number;
-  };
+  position: Position
 }
 
 export interface Cell {

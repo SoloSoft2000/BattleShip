@@ -1,17 +1,20 @@
 import { GamePlayer } from '../utils/interfaces';
 import { EventEmitter } from 'events';
 import { addShips } from './addShips';
+import { OponentField } from './OponentField';
 
 export class BotPlayer extends EventEmitter implements GamePlayer {
   private name: string;
   private idPlayer: number;
   private idGame: string = '';
   private ourHit: boolean = false;
+  private field: OponentField;
 
   constructor(name: string) {
     super();
     this.name = `Bot for play with ${name}`;
     this.idPlayer = Date.now();
+    this.field = new OponentField();
   }
 
   handleMessage(message: string): void {
@@ -32,9 +35,9 @@ export class BotPlayer extends EventEmitter implements GamePlayer {
       return;
     }
     if (type === 'attack') {
-      const { currentPlayer, status } = JSON.parse(data);
+      const { currentPlayer, status, position } = JSON.parse(data);
       if (currentPlayer === this.idPlayer) {
-        console.log('save data after attack' ,status);
+        this.field.saveStatus(position.x, position.y, status);
       }
       if (status !== 'miss' && this.ourHit) {
         setTimeout(() => {
@@ -47,15 +50,21 @@ export class BotPlayer extends EventEmitter implements GamePlayer {
   }
 
   private attack(): void {
+    const { x, y } = this.field.attack();
+
     const dataToSend = {
       gameId: this.idGame,
       indexPlayer: this.idPlayer,
+      x,
+      y
     };
+
     const msg = {
-      type: 'randomAttack',
+      type: x === -1 || y === -1 ? 'randomAttack' : 'attack',
       id: 0,
       data: JSON.stringify(dataToSend),
     };
+    
     this.emit('message', JSON.stringify(msg));
   }
 

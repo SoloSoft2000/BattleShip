@@ -110,6 +110,11 @@ const createPlayer = (userInfo: RegistrationData, ws: WebSocket): Player => {
     }
   });
 
+  player.on('finish_bot', (winPlayer: Player) => {
+    winners.addWinner(winPlayer);
+    sendUpdate('Winners');
+  })
+
   player.regUser(userInfo);
   return player;
 };

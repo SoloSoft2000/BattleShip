@@ -66,8 +66,8 @@ export class Game extends EventEmitter {
 
     let freeCell;
     do {
-      const x = randomInt(0, FIELD_SIZE - 1);
-      const y = randomInt(0, FIELD_SIZE - 1);
+      const x = randomInt(0, FIELD_SIZE );
+      const y = randomInt(0, FIELD_SIZE );
       const isAlreadyHit = field.getCellAlreadyHit(x, y);
       if (!isAlreadyHit) freeCell = { x, y };
     } while (!freeCell);
