@@ -27,8 +27,8 @@ export const addShips = (): Ship[] => {
   const testPosition = (length: number, pos: Position): boolean => {
     const { x, y, direction } = pos;
     
-    if (direction && x + length >= FIELD_SIZE) return false;
-    if (!direction && y + length >= FIELD_SIZE) return false;
+    if (!direction && x + length >= FIELD_SIZE) return false;
+    if (direction && y + length >= FIELD_SIZE) return false;
 
     const startX = Math.max(0, x - 1);
     const endX = Math.min(FIELD_SIZE - 1, direction ? x + 1 : x + length);
@@ -60,8 +60,8 @@ export const addShips = (): Ship[] => {
   ships.forEach((item) => {
     const { x, y, direction } = newPosition(item);
     for (let i = 0; i < item; i++) {
-      const curX = direction ? x + i : x;
-      const curY = direction ? y : y + i;
+      const curX = direction ? x : x + i;
+      const curY = direction ? y + i : y;
       field[curX][curY] = 'x';
     }
 

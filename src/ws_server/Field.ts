@@ -21,8 +21,8 @@ export class Field {
       const length = Number(item.length);
 
       for (let i = 0; i < length; i++) {
-        const curX = direction ? x + i : x;
-        const curY = direction ? y : y + i;
+        const curX = direction ? x : x + i;
+        const curY = direction ? y + i : y;
         this.field[curX][curY] = {
           ship: item,
           hit: false,
