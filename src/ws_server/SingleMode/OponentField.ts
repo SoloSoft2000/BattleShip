@@ -1,5 +1,5 @@
-import { FIELD_SIZE } from "../utils/consts";
-import { Position } from "../utils/interfaces";
+import { FIELD_SIZE } from '../utils/consts';
+import { Position } from '../utils/interfaces';
 
 export class OponentField {
   private field: string[][];
@@ -23,9 +23,8 @@ export class OponentField {
           } else {
             return a.y - b.y;
           }
-        })
-      }
-      else {
+        });
+      } else {
         this.isShotShip = false;
         this.positionShot.length = 0;
       }
@@ -40,24 +39,26 @@ export class OponentField {
       const lastShot = this.positionShot[this.positionShot.length - 1];
 
       if (this.positionShot.length === 1) {
-
-        const nextDirections = [ 
+        const nextDirections = [
           { dx: -1, dy: 0 },
           { dx: 1, dy: 0 },
           { dx: 0, dy: -1 },
-          { dx: 0, dy: 1 }
+          { dx: 0, dy: 1 },
         ];
 
         for (const direction of nextDirections) {
           const currX = lastShot.x + direction.dx;
           const currY = lastShot.y + direction.dy;
           if (
-            currX >= 0 && currX < FIELD_SIZE && 
-            currY >= 0 && currY < FIELD_SIZE &&
-            this.field[currX][currY] !== '~') {
-              x = currX;
-              y = currY;
-              break;
+            currX >= 0 &&
+            currX < FIELD_SIZE &&
+            currY >= 0 &&
+            currY < FIELD_SIZE &&
+            this.field[currX][currY] !== '~'
+          ) {
+            x = currX;
+            y = currY;
+            break;
           }
         }
       } else {
@@ -89,7 +90,7 @@ export class OponentField {
     for (let i = 0; i < this.field.length; i++) {
       print += `${i}|`;
       for (let j = 0; j < this.field.length; j++) {
-        print += this.field[j][i] + '|'
+        print += this.field[j][i] + '|';
       }
       print += '\n';
     }

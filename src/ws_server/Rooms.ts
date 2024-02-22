@@ -18,8 +18,7 @@ export class Rooms {
 
   getRoomByOwner(player: Player): number {
     const room = this.rooms.find((room) => room.getOwner() === player);
-    if (room) 
-      return room.getId();
+    if (room) return room.getId();
     return -1;
   }
 

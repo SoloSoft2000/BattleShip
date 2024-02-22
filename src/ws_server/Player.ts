@@ -41,7 +41,7 @@ export class Player extends EventEmitter implements GamePlayer {
         game.on('finish', (winPlayer: GamePlayer) => {
           this.emit('finish_bot', winPlayer);
         });
-        
+
         game.start();
         break;
     }

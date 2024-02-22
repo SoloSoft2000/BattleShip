@@ -41,12 +41,11 @@ export class BotPlayer extends EventEmitter implements GamePlayer {
       }
       if (status !== 'miss' && this.ourHit) {
         setTimeout(() => {
-          this.attack()
+          this.attack();
         }, 2500); // Time for think
       }
       return;
     }
-    
   }
 
   private attack(): void {
@@ -56,7 +55,7 @@ export class BotPlayer extends EventEmitter implements GamePlayer {
       gameId: this.idGame,
       indexPlayer: this.idPlayer,
       x,
-      y
+      y,
     };
 
     const msg = {
@@ -64,7 +63,7 @@ export class BotPlayer extends EventEmitter implements GamePlayer {
       id: 0,
       data: JSON.stringify(dataToSend),
     };
-    
+
     this.emit('message', JSON.stringify(msg));
   }
 
