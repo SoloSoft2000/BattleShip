@@ -10,17 +10,31 @@ const players: Player[] = [];
 const rooms = new Rooms();
 const winners = new Winners();
 
-export const gameServer = (): void => {
-  const wss = new WebSocketServer({
-    port: 3000,
-  });
-
+export const serverListen = (wss: WebSocketServer): void => {
   wss.on('connection', (ws) => {
     ws.on('message', (message) => {
-      handleMessage(message.toString(), ws);
+      const msg = message.toString();
+      const { type, data } = JSON.parse(msg);
+      console.log('received:', type);
+      try {
+        console.log('data:', JSON.parse(data));
+      } catch (error) {
+        console.log('data:', data);
+        
+      }
+      handleMessage(msg, ws);
     });
   });
 };
+
+export const closeServer = (wss: WebSocketServer): void => {
+  const message = JSON.stringify({ type: 'close', data: 'Server is closing' });
+  players.forEach((player) => {
+      player.getWS().send(message);
+      player.getWS().close();
+  })
+  wss.close();
+}
 
 const handleMessage = (message: string, ws: WebSocket): void => {
   const { type, data } = JSON.parse(message.toString());
