@@ -47,6 +47,10 @@ export class Player extends EventEmitter implements GamePlayer {
     }
   }
 
+  checkPassword(password: string): boolean {
+    return password === this.password;
+  }
+
   getId(): number {
     return this.idPlayer;
   }
@@ -87,10 +91,10 @@ export class Player extends EventEmitter implements GamePlayer {
     this.ws.send(regJson);
   }
 
-  static SendErrorLogin(ws: WebSocket): void {
+  static SendErrorLogin(ws: WebSocket, errorText: string): void {
     const userData = JSON.stringify({
       error: true,
-      errorText: 'User is already logged in',
+      errorText,
     });
     const regJson: string = JSON.stringify({
       type: 'reg',

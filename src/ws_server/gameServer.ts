@@ -45,8 +45,13 @@ const handleRegistration = (data: string, ws: WebSocket): void => {
   const userInfo = JSON.parse(data);
   const tempId = Player.GenerateId(userInfo);
 
+  if (!verifyPassword(userInfo)) {
+    Player.SendErrorLogin(ws, 'Invalid password');
+    return;
+  }
+
   if (isPlayerAlreadyRegistered(tempId)) {
-    Player.SendErrorLogin(ws);
+    Player.SendErrorLogin(ws, 'User is already logged in');
     return;
   }
 
@@ -122,3 +127,12 @@ const createPlayer = (userInfo: RegistrationData, ws: WebSocket): Player => {
 const isPlayerAlreadyRegistered = (tempId: number): boolean => {
   return players.findIndex((item: Player) => item.getId() === tempId) !== -1;
 };
+
+const verifyPassword = (userInfo: RegistrationData): boolean => {
+  const { name, password } = userInfo;
+  const idx = players.findIndex((player) => player.getName() === name);
+  if (idx === -1 || players[idx].checkPassword(password)) {
+    return true;
+  } else 
+  return false;
+}
