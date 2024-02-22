@@ -139,18 +139,22 @@ export class Game extends EventEmitter {
       const isFinish = field.getShipsOnField() === 0;
       if (isFinish) {
         const winPlayer = this.turnId;
-        const data = { winPlayer };
-        const message = {
-          type: 'finish',
-          data: JSON.stringify(data),
-          id: 0,
-        };
-
-        this.owner.getWS().send(JSON.stringify(message));
-        this.oponent.getWS().send(JSON.stringify(message));
-        this.emit('finish', winPlayer === this.owner.getId() ? this.owner : this.oponent);
+        this.finish(winPlayer);
       }
     }
+  }
+
+  finish(winPlayer: number): void {
+    const data = { winPlayer };
+    const message = {
+      type: 'finish',
+      data: JSON.stringify(data),
+      id: 0,
+    };
+
+    this.owner.getWS().send(JSON.stringify(message));
+    this.oponent.getWS().send(JSON.stringify(message));
+    this.emit('finish', winPlayer === this.owner.getId() ? this.owner : this.oponent);
   }
 
   feedback(currentPlayer: number, x: number, y: number, status: ShotStatus): void {
@@ -166,5 +170,13 @@ export class Game extends EventEmitter {
     };
     this.owner.getWS().send(JSON.stringify(message));
     this.oponent.getWS().send(JSON.stringify(message));
+  }
+
+  getId(): string {
+    return this.gameId;
+  }
+
+  getPlayers(): GamePlayer[] {
+    return [this.owner, this.oponent]
   }
 }

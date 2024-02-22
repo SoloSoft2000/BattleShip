@@ -9,6 +9,7 @@ import { RegistrationData } from './utils/interfaces';
 const players: Player[] = [];
 const rooms = new Rooms();
 const winners = new Winners();
+const games: Game[] = [];
 
 export const serverListen = (wss: WebSocketServer): void => {
   wss.on('connection', (ws) => {
@@ -24,6 +25,22 @@ export const serverListen = (wss: WebSocketServer): void => {
       }
       handleMessage(msg, ws);
     });
+
+    ws.on('close', () => {
+      const closedPlayer = findPlayerByWS(ws);
+      if (closedPlayer) {
+        rooms.removeRoom(rooms.getRoomByOwner(closedPlayer));
+        const startedGame: Game | undefined = games.find(game => game.getPlayers().includes(closedPlayer))
+        if (startedGame) {
+          const winner = startedGame.getPlayers().find(pl => pl.getId() !== closedPlayer.getId())?.getId();
+          startedGame.finish(winner || 0);
+          games.splice(games.indexOf(startedGame), 1);
+        }
+        players.splice(players.indexOf(closedPlayer), 1);
+        sendUpdate('Rooms');
+        sendUpdate('Winners');
+      }
+    })
   });
 };
 
@@ -105,7 +122,8 @@ const createPlayer = (userInfo: RegistrationData, ws: WebSocket): Player => {
         }
         sendUpdate('Rooms');
         const owner = activeRoom.getOwner();
-        const game: Game | undefined = new Game(owner, player);
+        const game: Game = new Game(owner, player);
+        games.push(game);
 
         const handlerOwner = (msg: string): void => game.handleOwner(msg);
         const handlerOponent = (msg: string): void => game.handleOponent(msg);
@@ -121,6 +139,7 @@ const createPlayer = (userInfo: RegistrationData, ws: WebSocket): Player => {
           rooms.removeRoom(activeRoomIndex);
           sendUpdate('Rooms');
           sendUpdate('Winners');
+          games.splice(games.indexOf(game), 1);
           game.removeAllListeners();
         });
 
