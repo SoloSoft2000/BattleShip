@@ -28,6 +28,7 @@ export const serverListen = (wss: WebSocketServer): void => {
 export const closeServer = (wss: WebSocketServer): void => {
   const message = JSON.stringify({ type: 'close', data: 'Server is closing' });
   db.players.forEach((player) => {
+    console.log('send "Server Close"');
     player.getWS().send(message);
     player.getWS().close();
   });

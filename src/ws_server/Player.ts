@@ -87,7 +87,7 @@ export class Player extends EventEmitter implements GamePlayer {
       id: 0,
       data: userData,
     });
-
+    console.log('send feedback of login');
     this.ws.send(regJson);
   }
 
@@ -101,6 +101,7 @@ export class Player extends EventEmitter implements GamePlayer {
       id: 0,
       data: userData,
     });
+    console.log('send error of login');
     ws.send(regJson);
   }
 }

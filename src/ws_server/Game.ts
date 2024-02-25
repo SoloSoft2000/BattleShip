@@ -35,6 +35,7 @@ export class Game extends EventEmitter {
           idPlayer: player.getId(),
         }),
       });
+      console.log('send "create_game"');
       player.getWS().send(message);
     });
   }
@@ -99,6 +100,7 @@ export class Game extends EventEmitter {
           data: JSON.stringify({ ships: fieldJSON }),
           currentPlayerIndex: player.getId(),
         });
+        console.log('send "start_game"');
         player.getWS().send(message);
         this.turn(player, this.owner.getId());
       });
@@ -111,7 +113,7 @@ export class Game extends EventEmitter {
       type: 'turn',
       data: JSON.stringify({ currentPlayer: playIndex }),
     });
-
+    console.log('send "turn"');
     player.getWS().send(message);
   }
 
@@ -151,7 +153,7 @@ export class Game extends EventEmitter {
       data: JSON.stringify(data),
       id: 0,
     };
-
+    console.log('send "finish"');
     this.owner.getWS().send(JSON.stringify(message));
     this.oponent.getWS().send(JSON.stringify(message));
     this.emit('finish', winPlayer === this.owner.getId() ? this.owner : this.oponent);
@@ -168,6 +170,7 @@ export class Game extends EventEmitter {
       data: JSON.stringify(data),
       id: 0,
     };
+    console.log('send feedback of attack');
     this.owner.getWS().send(JSON.stringify(message));
     this.oponent.getWS().send(JSON.stringify(message));
   }

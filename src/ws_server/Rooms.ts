@@ -58,7 +58,7 @@ export class Rooms {
       id: 0,
       data: JSON.stringify(this.getRooms()),
     });
-
+    console.log('send "update_room"');
     ws.send(message);
   }
 }

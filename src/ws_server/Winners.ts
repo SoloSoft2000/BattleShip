@@ -41,6 +41,7 @@ export class Winners {
       id: 0,
       data: JSON.stringify(this.getWinners()),
     };
+    console.log('send "update_winners"');
     ws.send(JSON.stringify(message));
   }
 }
