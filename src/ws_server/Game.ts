@@ -1,8 +1,8 @@
-import { Field, ShotStatus } from './Field';
+import { Field } from './Field';
 import { Player } from './Player';
 import { randomInt, randomUUID } from 'crypto';
 import { EventEmitter } from 'events';
-import { GamePlayer } from './utils/interfaces';
+import { GamePlayer, ShotStatus } from './utils/interfaces';
 import { FIELD_SIZE } from './utils/consts';
 
 export class Game extends EventEmitter {
@@ -134,7 +134,7 @@ export class Game extends EventEmitter {
     } else if (result === 'killed') {
       const neighbourCells = field.getNeighbourCells(x, y);
       neighbourCells.forEach((cell) => {
-        this.feedback(indexPlayer, cell.x, cell.y, 'miss');
+        this.feedback(indexPlayer, cell.x, cell.y, cell.status);
       });
       const isFinish = field.getShipsOnField() === 0;
       if (isFinish) {

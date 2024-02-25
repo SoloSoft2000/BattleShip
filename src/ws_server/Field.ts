@@ -1,6 +1,4 @@
-import { Ship, Cell } from './utils/interfaces';
-
-export type ShotStatus = 'miss' | 'killed' | 'shot' | 'already';
+import { Ship, Cell, ShotStatus } from './utils/interfaces';
 
 export class Field {
   private field: Cell[][];
@@ -8,7 +6,7 @@ export class Field {
   private fieldSize: number;
 
   constructor(size: number = 10) {
-    this.field = Array.from({ length: size }, () => Array(size).fill({ ship: null, hit: false }));
+    this.field = Array.from({ length: size }, () => Array(size).fill({ ship: null, hitStatus: undefined }));
     this.ships = [];
     this.fieldSize = size;
   }
@@ -25,7 +23,7 @@ export class Field {
         const curY = direction ? y + i : y;
         this.field[curX][curY] = {
           ship: item,
-          hit: false,
+          hitStatus: undefined,
         };
       }
 
@@ -39,7 +37,7 @@ export class Field {
 
   getCellAlreadyHit(x: number, y: number): boolean {
     const cell = this.field[x][y];
-    if (cell.hit) {
+    if (cell.hitStatus) {
       return true;
     } else {
       return false;
@@ -48,15 +46,11 @@ export class Field {
 
   attack(x: number, y: number): ShotStatus {
     const cell = this.field[x][y];
-    if (cell.hit) {
+    if (cell.hitStatus) {
       return 'already';
     }
-    this.field[x][y] = {
-      ...cell,
-      hit: true,
-    };
 
-    let result = 'miss';
+    let result: ShotStatus = 'miss';
     const shipIndex = this.ships.findIndex((s) => s.ship === cell.ship);
     if (shipIndex !== -1) {
       this.ships[shipIndex].hitLeft--;
@@ -68,11 +62,16 @@ export class Field {
       }
     }
 
+    this.field[x][y] = {
+      ...cell,
+      hitStatus: result,
+    };
+
     return result as ShotStatus;
   }
 
-  getNeighbourCells(x: number, y: number): { x: number; y: number }[] {
-    const result: { x: number; y: number }[] = [];
+  getNeighbourCells(x: number, y: number): { x: number; y: number; status: ShotStatus }[] {
+    const result: { x: number; y: number; status: ShotStatus }[] = [];
 
     const ship = this.field[x][y].ship;
 
@@ -86,13 +85,20 @@ export class Field {
 
       for (let i = startX; i <= endX; i++) {
         for (let j = startY; j <= endY; j++) {
-          if (!this.field[i][j].hit) {
+          if (this.field[i][j].hitStatus === 'shot') {
             const cell = this.field[i][j];
             this.field[i][j] = {
               ...cell,
-              hit: true,
+              hitStatus: 'killed',
             };
-            result.push({ x: i, y: j });
+            result.push({ x: i, y: j, status: 'killed' });
+          } else if (!this.field[i][j].hitStatus) {
+            const cell = this.field[i][j];
+            this.field[i][j] = {
+              ...cell,
+              hitStatus: 'miss',
+            };
+            result.push({ x: i, y: j, status: 'miss' });
           }
         }
       }

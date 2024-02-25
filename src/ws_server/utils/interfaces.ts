@@ -16,9 +16,11 @@ export interface Ship {
   position: Position;
 }
 
+export type ShotStatus = 'miss' | 'killed' | 'shot' | 'already';
+
 export interface Cell {
   ship: Ship | null;
-  hit: boolean;
+  hitStatus: ShotStatus | undefined;
 }
 
 export interface RegistrationData {
